@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="shortcut icon" href="./assets/images/logo/g2.jpg" type="image/x-icon" />
+    <title>Checkout</title>
+    <style>
+        body {
+            font-family: "Arial", sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        #form-container {
+            height: 100vh;
+            max-width: 700px;
+            margin: 50px auto;
+        }
+
+        #checkout-form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        #checkout-form h2 {
+            color: #333;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #555;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 16px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        #checkoutCodes {
+            resize: none;
+        }
+
+        .form-container {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .form-group {
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        #order-now-button,
+        #copy-button,
+        #get-sizes-button {
+            background-color: #6cb2eb;
+            color: #fff;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            position: relative;
+        }
+
+        #copy-button {
+            position: relative;
+            margin-top: 8px;
+            background-color: #4caf50;
+        }
+
+        #copy-button::before {
+            content: "";
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0.7;
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(1.5);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0.7;
+            }
+        }
+
+        #order-now-button:hover,
+        #copy-button:hover,
+        #get-sizes-button:hover {
+            background-color: #4f8dca;
+        }
+
+        /* Modal Styles */
+        #size-modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0, 0, 0);
+            background-color: rgba(0, 0, 0, 0.9);
+            padding-top: 60px;
+        }
+
+        #size-modal-content {
+            margin: auto;
+            display: block;
+            max-width: 80%;
+            max-height: 80%;
+        }
+
+        #size-modal-content img {
+            width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="form-container">
+        <div id="checkout-form">
+            <h2>Checkout</h2>
+
+            <!-- Customer Information Form -->
+            <form action="process_order.php" method="post" id="form">
+                <label for="fullName">Full Name:</label>
+                <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" required />
+
+                <label for="contactNo">Contact No:</label>
+                <input type="tel" id="contactNo" name="contactNo" placeholder="Enter your contact number" required />
+
+                <div class="form-container">
+                    <div class="form-group">
+                        <label for="city">City:</label>
+                        <input type="text" id="city" name="city" placeholder="Enter your city" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="district">District:</label>
+                        <input type="text" id="district" name="district" placeholder="Enter your district" required />
+                    </div>
+                </div>
+
+                <label for="streetAddress">Street Address:</label>
+                <input type="text" id="streetAddress" name="streetAddress" placeholder="Enter your street address"
+                    required />
+
+                <!-- Product Codes for Checkout -->
+                <label for="checkoutCodes">Product Codes for Checkout:</label>
+                <textarea style="width: 50%" id="checkoutCodes" rows="4" cols="50"
+                    placeholder="Enter product codes for checkout" readonly></textarea>
+
+                <!-- Copy button -->
+                <button id="copy-button" onclick="copyToClipboard()" style="position: relative; top: -60px">
+                    Copy
+                </button>
+
+                <label for="productCodes">Paste your copied 'Product Codes' </label>
+                <input type="text" id="productCodes" name="productCodes" placeholder="Paste your product codes here"
+                    required />
+                <div id="res" style="color: green; font-size: 16px; padding: 10px 0px"></div>
+
+                <!-- Get Sizes button -->
+                <button id="get-sizes-button" onclick="openSizeModal()"
+                    style="margin-bottom: 10px; background-color: #3e3e3e;">Get Sizes</button>
+
+                <!-- Size and Comments -->
+                <div class="form-container">
+                    <div class="form-group">
+                        <label for="productSize">Desired Size:</label>
+                        <input type="text" id="productSize" name="productSize" placeholder="Enter your product size"
+                            required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="extraComments">Comments:</label>
+                        <textarea id="extraComments" name="extraComments" placeholder="Comment if needed"></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" id="order-now-button"
+                    style="background-color: green; position: relative; left: 35%;">Place Order</button>
+
+            </form>
+
+            <!-- Size Chart Modal -->
+            <div id="size-modal">
+                <div id="size-modal-content">
+                    <span onclick="closeSizeModal()" style="color: #fff; font-size: 20px; position: absolute; top: 15px;
+                    right: 15px; cursor: pointer;">&times;</span>
+                    <img src="products/tees/sizechart.jpg" alt="Size Chart">
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Function to open the size chart modal
+            function openSizeModal() {
+                document.getElementById("size-modal").style.display = "block";
+            }
+
+            // Function to close the size chart modal
+            function closeSizeModal() {
+                document.getElementById("size-modal").style.display = "none";
+            }
+
+            // Function to get URL parameter by name
+            function getUrlParameter(name) {
+                const urlParams = new URLSearchParams(window.location.search);
+                return urlParams.get(name);
+            }
+
+            // Function to update product codes from the URL parameter
+            function updateProductCodes() {
+                const productCodes = getUrlParameter("productCodes");
+
+                if (productCodes) {
+                    document.getElementById("checkoutCodes").value = productCodes;
+                }
+            }
+
+            // Function to copy text to clipboard
+            function copyToClipboard() {
+                const checkoutCodes = document.getElementById("checkoutCodes");
+                checkoutCodes.select();
+                document.execCommand("copy");
+                alert("Copied to clipboard!");
+            }
+
+            // Execute the functions when the page loads
+            updateProductCodes();
+
+            // Website form to spreadsheet data transform
+            let url =
+                "https://script.google.com/macros/s/AKfycbxs522q6Z1j5XZjwwBnaKv18FlqX9bdV_QNPmL4GcPmQR75zS6O9UL-ibcZPqZesj6w/exec";
+            let form = document.querySelector("#form");
+
+            form.addEventListener("submit", (e) => {
+                document.getElementById("order-now-button").innerHTML = "submitting...";
+                let d = new FormData(form);
+                fetch(url, {
+                    method: "POST",
+                    body: d,
+                })
+                    .then((res) => res.text())
+                    .then((finalRes) => {
+                        document.getElementById("order-now-button").innerHTML = "submit";
+                        document.getElementById("res").innerHTML = finalRes;
+                        form.reset();
+                        setTimeout(() => {
+                            document.getElementById("res").innerHTML = "";
+                        }, 1000);
+
+                        // Redirect to the thank you page after 1 second
+                        setTimeout(() => {
+                            window.location.href = "order-confirm.html";
+                        }, 1000);
+                    });
+                e.preventDefault();
+            });
+
+        </script>
+    </div>
+</body>
+
+</html>
